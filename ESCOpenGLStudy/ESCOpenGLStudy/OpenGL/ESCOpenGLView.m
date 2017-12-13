@@ -34,6 +34,8 @@
         [self setupRenderBuffer];
         //创建一个 frame buffer （帧缓冲区）
         [self setupFrameBuffer];
+        //编译OpenGL
+        [self compileShaders];
         //清理屏幕
         [self render];
     }
@@ -97,6 +99,71 @@
     glClear(GL_COLOR_BUFFER_BIT);
     //呈现到view上
     [_context presentRenderbuffer:GL_RENDERBUFFER];
+}
+
+- (void)compileShaders {
+    GLuint vertexShader = [self compileShader:@"SimpleVertex" type:GL_VERTEX_SHADER];
+    GLuint fragmentShader = [self compileShader:@"SimpleFragment" type:GL_FRAGMENT_SHADER];
+
+    GLuint programeHandle = glCreateProgram();
+    glAttachShader(programeHandle, vertexShader);
+    glAttachShader(programeHandle, fragmentShader);
+    glLinkProgram(programeHandle);
+
+
+    GLint linkSuccess;
+    glGetProgramiv(programeHandle, GL_LINK_STATUS, &linkSuccess);
+    if(linkSuccess == GL_FALSE) {
+        GLchar messages[2560];
+        glGetProgramInfoLog(programeHandle, sizeof(messages), 0, &messages[0]);
+        NSString *messageString = [NSString stringWithUTF8String:messages];
+        NSLog(@"error == %@",messageString);
+        return;
+    }
+
+    glUseProgram(programeHandle);
+
+    int positionSlot = glGetAttribLocation(programeHandle, "Position");
+    int colorSlot = glGetAttribLocation(programeHandle, "SourceColor");
+    glEnableVertexAttribArray(positionSlot);
+    glEnableVertexAttribArray(colorSlot);
+}
+
+//编译OpenGL的shader文件
+- (GLuint)compileShader:(NSString *)shaderName type:(GLenum)shadeType {
+    //查找要编译文件的路径
+    NSString *shaderPath = [[NSBundle mainBundle] pathForResource:shaderName ofType:@"glsl"];
+    NSError *error;
+    //读取文件内容
+    NSString *shaderString = [NSString stringWithContentsOfFile:shaderPath encoding:NSUTF8StringEncoding error:&error];
+    if(shaderString == nil) {
+        NSLog(@"error == %@",error);
+        return -1;
+    }
+
+    //调用glCreateShader来创建一个代表shader 的OpenGL对象，这时你必须告诉OpenGL，你想创建 fragment shader还是vertex shader。所以便有了这个参数：shaderType
+    GLuint shaderHandle = glCreateShader(shadeType);
+
+    const char *shaderStringUTF8 = [shaderString UTF8String];
+    int shaderStringLength = (int)[shaderString length];
+    //让OpenGL回去这个shader的源代码
+    glShaderSource(shaderHandle, 1, &shaderStringUTF8, &shaderStringLength);
+
+    //编译shader
+    glCompileShader(shaderHandle);
+
+
+    GLint compileSuccess;
+    //判断编译是否成功
+    glGetShaderiv(shaderHandle, GL_COMPILE_STATUS, &compileSuccess);
+    if(compileSuccess == GL_FALSE) {
+        GLchar messages[2560];
+        glGetShaderInfoLog(shaderHandle, sizeof(messages), 0, &messages[0]);
+        NSString *messageString = [NSString stringWithUTF8String:messages];
+        NSLog(@"error ===%@ ===%@",shaderName,messageString);
+        return -1;
+    }
+    return shaderHandle;
 }
 
 @end
