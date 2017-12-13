@@ -10,6 +10,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
+#import "ESCOpenGLHeader.h"
 
 @interface ESCOpenGLView ()
 
@@ -18,6 +19,10 @@
 @property(nonatomic,strong)EAGLContext* context;
 
 @property(nonatomic,assign)GLuint colorRenderBuffer;
+
+@property(nonatomic,assign)    GLuint positionSlot;
+
+@property(nonatomic,assign)GLuint colorSlot;
 
 @end
 
@@ -36,8 +41,12 @@
         [self setupFrameBuffer];
         //编译OpenGL
         [self compileShaders];
+
+        [self setupVBOs];
+        
         //清理屏幕
         [self render];
+
     }
     return self;
 }
@@ -97,20 +106,31 @@
     glClearColor(0, 104.0/255.0, 55.0/255.0, 1.0);
     //填充颜色
     glClear(GL_COLOR_BUFFER_BIT);
+
+    glViewport(0, 0, self.frame.size.width, self.frame.size.height);
+
+    glVertexAttribPointer(_positionSlot, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+    glVertexAttribPointer(_colorSlot, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid *)(sizeof(float) * 3));
+
+    glDrawElements(GL_TRIANGLES, sizeof(Indices) / sizeof(Indices[0]), GL_UNSIGNED_BYTE, 0);
+
     //呈现到view上
     [_context presentRenderbuffer:GL_RENDERBUFFER];
 }
 
 - (void)compileShaders {
+    //编译文件
     GLuint vertexShader = [self compileShader:@"SimpleVertex" type:GL_VERTEX_SHADER];
     GLuint fragmentShader = [self compileShader:@"SimpleFragment" type:GL_FRAGMENT_SHADER];
 
+    //链接文件
     GLuint programeHandle = glCreateProgram();
     glAttachShader(programeHandle, vertexShader);
     glAttachShader(programeHandle, fragmentShader);
     glLinkProgram(programeHandle);
 
 
+    //检查错误
     GLint linkSuccess;
     glGetProgramiv(programeHandle, GL_LINK_STATUS, &linkSuccess);
     if(linkSuccess == GL_FALSE) {
@@ -121,12 +141,14 @@
         return;
     }
 
+    //执行程序
     glUseProgram(programeHandle);
 
-    int positionSlot = glGetAttribLocation(programeHandle, "Position");
-    int colorSlot = glGetAttribLocation(programeHandle, "SourceColor");
-    glEnableVertexAttribArray(positionSlot);
-    glEnableVertexAttribArray(colorSlot);
+    //最后，调用 glGetAttribLocation 来获取指向 vertex shader传入变量的指针。以后就可以通过这写指针来使用了。还有调用 glEnableVertexAttribArray来启用这些数据。
+    self.positionSlot = glGetAttribLocation(programeHandle, "Position");
+    self.colorSlot = glGetAttribLocation(programeHandle, "SourceColor");
+    glEnableVertexAttribArray(self.positionSlot);
+    glEnableVertexAttribArray(self.colorSlot);
 }
 
 //编译OpenGL的shader文件
@@ -164,6 +186,19 @@
         return -1;
     }
     return shaderHandle;
+}
+
+- (void)setupVBOs {
+    GLuint vertexBuffer;
+    glGenBuffers(1, &vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+
+    GLuint indexBuffer;
+    glGenBuffers(1, &indexBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
+
 }
 
 @end

@@ -39,6 +39,7 @@
 		061F1B3B1FE12CCC00A5E9A6 /* SimpleVertex.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = SimpleVertex.glsl; sourceTree = "<group>"; };
 		061F1B3D1FE12DE300A5E9A6 /* SimpleFragment.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = SimpleFragment.glsl; sourceTree = "<group>"; };
 		061F1B3F1FE136C700A5E9A6 /* File.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = File.txt; sourceTree = "<group>"; };
+		061F1B411FE138D500A5E9A6 /* ESCOpenGLHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESCOpenGLHeader.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,6 +103,7 @@
 			children = (
 				061F1B371FE1262B00A5E9A6 /* ESCOpenGLView.h */,
 				061F1B381FE1262B00A5E9A6 /* ESCOpenGLView.m */,
+				061F1B411FE138D500A5E9A6 /* ESCOpenGLHeader.h */,
 				061F1B3B1FE12CCC00A5E9A6 /* SimpleVertex.glsl */,
 				061F1B3F1FE136C700A5E9A6 /* File.txt */,
 				061F1B3D1FE12DE300A5E9A6 /* SimpleFragment.glsl */,
