@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "ESCOpenGLView.h"
 
 @interface ViewController ()
 
@@ -16,13 +17,10 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
-}
 
+    ESCOpenGLView *openGLView = [[ESCOpenGLView alloc] initWithFrame:self.view.bounds];
+    [self.view addSubview:openGLView];
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 
