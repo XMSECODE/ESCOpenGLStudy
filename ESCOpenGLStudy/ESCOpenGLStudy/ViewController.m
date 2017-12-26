@@ -18,9 +18,21 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    ESCOpenGLView *openGLView = [[ESCOpenGLView alloc] initWithFrame:self.view.bounds];
-    [self.view addSubview:openGLView];
 
+    CGFloat width = [UIScreen mainScreen].bounds.size.width;
+    CGFloat height = [UIScreen mainScreen].bounds.size.height;
+
+    CGFloat viewW = 10;
+    CGFloat viewH = 10;
+    for (int i = 0; i < width; i+= viewW) {
+        for (int j = 0; j < height; j+= viewH) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                CGRect frame = CGRectMake(i, j, viewW, viewH);
+                ESCOpenGLView *openGLView1 = [[ESCOpenGLView alloc] initWithFrame:frame];
+                [self.view addSubview:openGLView1];
+            });
+        }
+    }
 }
 
 
